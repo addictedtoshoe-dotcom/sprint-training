@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a1929">
+<title>Sprint Training</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0a1929;
+    color: #f0f4f8;
+    line-height: 1.5;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { padding-bottom: 40px; }
+  .header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10, 25, 41, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; }
+  .header h1 .accent { color: #00d4ff; }
+  .header-buttons { display: flex; gap: 8px; }
+  .icon-btn {
+    background: rgba(255,255,255,0.08);
+    border: none; color: #f0f4f8;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .icon-btn:active { background: rgba(255,255,255,0.18); }
+
+  .container { padding: 16px; max-width: 720px; margin: 0 auto; }
+
+  /* Program picker */
+  .picker-screen { padding: 24px 16px; max-width: 720px; margin: 0 auto; }
+  .picker-screen h2 {
+    font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px;
+  }
+  .picker-screen .subtitle {
+    color: #8b9cb3; margin-bottom: 24px; font-size: 15px;
+  }
+  .program-card {
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    border-radius: 16px;
+    padding: 22px 20px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    width: 100%;
+    text-align: left;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    transition: transform 0.15s;
+  }
+  .program-card:active { transform: scale(0.98); }
+  .program-card .label {
+    font-size: 12px; font-weight: 700; opacity: 0.85;
+    letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .program-card .name {
+    font-size: 26px; font-weight: 800; margin-bottom: 6px;
+  }
+  .program-card .desc {
+    font-size: 14px; opacity: 0.9; line-height: 1.45;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px;
+    background: rgba(255,255,255,0.05);
+    padding: 4px; border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .tab {
+    flex: 1;
+    background: transparent;
+    border: none; color: #8b9cb3;
+    padding: 10px 8px;
+    font-size: 13px; font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .tab.active {
+    background: var(--accent, #00d4ff);
+    color: #0a1929;
+  }
+
+  /* Cards */
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .card h3 {
+    font-size: 17px; font-weight: 700; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card .meta {
+    font-size: 12px; color: #8b9cb3;
+    margin-bottom: 12px;
+    text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
+  }
+  .card .body { color: #cfd8e3; font-size: 15px; }
+
+  /* Phase header */
+  .phase-header {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+    color: #0a1929;
+  }
+  .phase-header .phase-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; opacity: 0.75;
+  }
+  .phase-header .phase-title {
+    font-size: 22px; font-weight: 800; margin: 4px 0;
+  }
+  .phase-header .phase-desc {
+    font-size: 14px; line-height: 1.5; font-weight: 500;
+  }
+
+  /* Step list */
+  .step-list { list-style: none; padding: 0; }
+  .step-list li {
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-num {
+    background: var(--accent, #00d4ff);
+    color: #0a1929;
+    min-width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .step-content { flex: 1; }
+  .step-title { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+  .step-detail { font-size: 14px; color: #b8c5d6; line-height: 1.45; }
+  .step-detail strong { color: #f0f4f8; }
+
+  /* Week selector */
+  .week-bar {
+    display: flex; gap: 6px; margin-bottom: 14px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .week-bar::-webkit-scrollbar { display: none; }
+  .week-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #b8c5d6;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .week-btn.active {
+    background: var(--accent, #00d4ff);
+    color: #0a1929;
+    border-color: var(--accent, #00d4ff);
+  }
+
+  /* Day */
+  .day-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .day-card .day-label {
+    font-size: 11px; font-weight: 800; color: var(--accent, #00d4ff);
+    letter-spacing: 1.2px; text-transform: uppercase;
+  }
+  .day-card .day-focus { font-size: 16px; font-weight: 700; margin: 2px 0 6px; }
+  .day-card .day-work { font-size: 14px; color: #cfd8e3; line-height: 1.5; }
+  .day-card.rest { opacity: 0.6; }
+  .day-card.rest .day-focus { font-style: italic; }
+
+  /* Daily picker buttons */
+  .picker-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .picker-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #f0f4f8;
+    padding: 14px 12px;
+    border-radius: 10px;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .picker-btn:active { background: rgba(255,255,255,0.1); }
+  .picker-btn.selected {
+    background: var(--accent, #00d4ff);
+    color: #0a1929;
+    border-color: var(--accent, #00d4ff);
+  }
+  .picker-btn .pb-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .picker-btn .pb-desc { font-size: 11px; opacity: 0.75; line-height: 1.3; }
+
+  /* Cue boxes */
+  .cue {
+    background: rgba(0, 212, 255, 0.08);
+    border-left: 3px solid var(--accent, #00d4ff);
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #d8e6f5;
+  }
+  .cue strong { color: var(--accent, #00d4ff); }
+
+  .warn {
+    background: rgba(255, 180, 0, 0.08);
+    border-left: 3px solid #ffb400;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin: 10px 0;
+    font-size: 13px;
+    color: #f0e2c0;
+  }
+  .warn strong { color: #ffb400; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    display: none;
+    align-items: flex-end;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: #142a44;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    padding: 20px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .modal h3 { font-size: 18px; margin-bottom: 12px; }
+  .modal-btn {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #f0f4f8;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px; font-weight: 600;
+    margin-bottom: 8px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .modal-btn:active { background: rgba(255,255,255,0.12); }
+  .modal-close {
+    background: transparent; border: 1px solid rgba(255,255,255,0.15);
+    color: #8b9cb3; padding: 12px;
+    width: 100%; border-radius: 10px; margin-top: 6px;
+    cursor: pointer; font-size: 14px;
+  }
+
+  /* Pace table */
+  .pace-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  .pace-table th, .pace-table td {
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .pace-table th {
+    color: var(--accent, #00d4ff);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .pace-table td { color: #cfd8e3; }
+
+  .switcher-link {
+    text-align: center; padding: 14px;
+    color: #8b9cb3; font-size: 13px;
+    margin-top: 8px;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- PROGRAM PICKER -->
+<div id="picker" class="picker-screen">
+  <h2>Sprint <span style="color:#00d4ff;">Training</span></h2>
+  <p class="subtitle">Pick your event — your warm-up, daily workouts, and weekly plan will be tailored to it.</p>
+
+  <button class="program-card" style="--c1:#ff3b30; --c2:#ff9500;" onclick="selectProgram('100')">
+    <div class="label">Pure Speed</div>
+    <div class="name">100m</div>
+    <div class="desc">Acceleration, max velocity, block starts. Short, all-out efforts with full recovery.</div>
+  </button>
+
+  <button class="program-card" style="--c1:#ff9500; --c2:#ffcc00;" onclick="selectProgram('200')">
+    <div class="label">Speed + Curve</div>
+    <div class="name">200m</div>
+    <div class="desc">Curve running, speed endurance, top-end maintenance. Speed you can hold.</div>
+  </button>
+
+  <button class="program-card" style="--c1:#00d4ff; --c2:#0a84ff;" onclick="selectProgram('400')">
+    <div class="label">Long Sprint</div>
+    <div class="name">400m</div>
+    <div class="desc">Lactate tolerance, pace control, race modeling. The hardest race in track.</div>
+  </button>
+
+  <button class="program-card" style="--c1:#5856d6; --c2:#34c759;" onclick="selectProgram('800')">
+    <div class="label">Middle Distance</div>
+    <div class="name">800m</div>
+    <div class="desc">Aerobic base, threshold, race-pace work, finishing kick. Speed plus stamina.</div>
+  </button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+  <div class="header">
+    <h1 id="header-title">Sprint <span class="accent">Training</span></h1>
+    <div class="header-buttons">
+      <button class="icon-btn" onclick="openHelp()" title="Help">?</button>
+      <button class="icon-btn" onclick="openSettings()" title="Settings">⚙</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" data-tab="warmup" onclick="switchTab('warmup')">Warm-Up</button>
+      <button class="tab" data-tab="today" onclick="switchTab('today')">Today</button>
+      <button class="tab" data-tab="plan" onclick="switchTab('plan')">4-Week Plan</button>
+      <button class="tab" data-tab="cues" onclick="switchTab('cues')">Race Cues</button>
+    </div>
+
+    <div id="tab-warmup"></div>
+    <div id="tab-today" class="hidden"></div>
+    <div id="tab-plan" class="hidden"></div>
+    <div id="tab-cues" class="hidden"></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h3>Settings</h3>
+    <button class="modal-btn" onclick="switchProgram()">🔄 Switch Event</button>
+    <button class="modal-btn" onclick="openHelp(); closeSettings();">❓ How to Use This App</button>
+    <button class="modal-close" onclick="closeSettings()">Close</button>
+  </div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal">
+    <h3>How to Use This App</h3>
+    <div style="font-size:14px; color:#cfd8e3; line-height:1.6;">
+      <p style="margin-bottom:10px;"><strong style="color:#00d4ff;">Warm-Up</strong> — Do this before every track workout or race. Takes 15–20 minutes.</p>
+      <p style="margin-bottom:10px;"><strong style="color:#00d4ff;">Today</strong> — Pick a session type if you want to train on your own or substitute for the plan.</p>
+      <p style="margin-bottom:10px;"><strong style="color:#00d4ff;">4-Week Plan</strong> — A structured weekly schedule. Swipe through weeks at the top.</p>
+      <p style="margin-bottom:10px;"><strong style="color:#00d4ff;">Race Cues</strong> — Phase-by-phase technique reminders for race day.</p>
+      <p style="margin-bottom:10px;">Tap the <strong>⚙ gear</strong> in the top right to switch events at any time.</p>
+    </div>
+    <button class="modal-close" onclick="closeHelp()">Got it</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// PROGRAM SELECTION
+// ============================================================
+const PROGRAMS = {
+  '100': { name: '100m', accent: '#ff5e3a', accent2: '#ff9500', label: 'Pure Speed' },
+  '200': { name: '200m', accent: '#ff9500', accent2: '#ffcc00', label: 'Speed + Curve' },
+  '400': { name: '400m', accent: '#00d4ff', accent2: '#0a84ff', label: 'Long Sprint' },
+  '800': { name: '800m', accent: '#5ac8fa', accent2: '#34c759', label: 'Middle Distance' }
+};
+
+let currentProgram = null;
+let currentWeek = 1;
+let currentDailyPick = null;
+
+const STORAGE_KEY = 'sprintTrainingApp_v1';
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      program: currentProgram,
+      week: currentWeek
+    }));
+  } catch (e) { /* private mode or storage full — fail silently */ }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+function selectProgram(key) {
+  currentProgram = key;
+  document.documentElement.style.setProperty('--accent', PROGRAMS[key].accent);
+  document.documentElement.style.setProperty('--accent-2', PROGRAMS[key].accent2);
+  document.getElementById('header-title').innerHTML =
+    `${PROGRAMS[key].name} <span class="accent">Training</span>`;
+  document.getElementById('picker').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  renderAll();
+  saveState();
+  window.scrollTo(0, 0);
+}
+
+function switchProgram() {
+  closeSettings();
+  currentProgram = null;
+  currentWeek = 1;
+  currentDailyPick = null;
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('picker').classList.remove('hidden');
+  window.scrollTo(0, 0);
+}
+
+// On page load: if a previous event was saved, jump straight to the app
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = loadState();
+  if (saved && saved.program && PROGRAMS[saved.program]) {
+    if (saved.week && saved.week >= 1 && saved.week <= 4) {
+      currentWeek = saved.week;
+    }
+    selectProgram(saved.program);
+  }
+});
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  ['warmup','today','plan','cues'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('hidden', t !== name);
+  });
+  window.scrollTo(0, 0);
+}
+
+function openSettings() { document.getElementById('settingsModal').classList.add('show'); }
+function closeSettings() { document.getElementById('settingsModal').classList.remove('show'); }
+function openHelp() { document.getElementById('helpModal').classList.add('show'); }
+function closeHelp() { document.getElementById('helpModal').classList.remove('show'); }
+
+// ============================================================
+// WARM-UP DATA
+// ============================================================
+const WARMUP = {
+  common: [
+    { title: 'Easy Jog', detail: '<strong>400–800m easy jog</strong> to raise core temperature. About 4–6 minutes at conversation pace. You should feel warm, not winded.' },
+    { title: 'Dynamic Stretching', detail: '<strong>Leg swings</strong> (front-back × 10 each leg, side-to-side × 10 each leg). <strong>Walking knee hugs</strong> × 10 steps. <strong>Walking quad pulls</strong> × 10 steps. <strong>Walking lunges with twist</strong> × 10 steps. <strong>Inchworms</strong> × 5.' },
+    { title: 'Hip Mobility', detail: '<strong>Hurdle walkovers</strong> over and under × 5 each direction. <strong>Fire hydrants</strong> × 10 each side. <strong>World’s greatest stretch</strong> × 3 each side. Focus on opening the hips — sprinting power lives here.' },
+    { title: 'Sprint Drills (A/B series)', detail: '<strong>A-skips</strong> × 20m. <strong>A-runs</strong> × 20m. <strong>B-skips</strong> × 20m. <strong>High knees</strong> × 20m. <strong>Butt kicks</strong> × 20m. <strong>Straight-leg bounds</strong> × 20m. Walk back between each. Quality over speed — these are technique, not effort.' },
+    { title: 'Activation', detail: '<strong>Glute bridges</strong> × 15. <strong>Lateral band walks</strong> × 10 each direction (or skip if no band). <strong>Pogo hops</strong> × 20 (light, springy ankles).' }
+  ],
+  '100': [
+    { title: 'Build-Ups', detail: '<strong>3–4 × 60m build-ups.</strong> Start at 50%, accelerate gradually to 90% by 50m, decelerate the last 10m. Walk back between. The last one should feel close to race speed.' },
+    { title: 'Block Starts (race day)', detail: '<strong>2–3 starts out to 20–30m</strong> at 90–95%. Focus on a powerful first three steps — push, don’t reach. Full recovery between. Skip if it’s a training day, not race day.' }
+  ],
+  '200': [
+    { title: 'Build-Ups', detail: '<strong>3–4 × 80m build-ups</strong> with the last 30m on the curve. Walk back. Accelerate smoothly — feel the curve lean.' },
+    { title: 'Curve Strides', detail: '<strong>2 × 60m at 85%</strong> running the curve. Lean into the turn, drive with the outside (right) arm, keep eyes up.' }
+  ],
+  '400': [
+    { title: 'Build-Ups', detail: '<strong>3 × 80–100m build-ups</strong>, accelerating gradually to 80%. Walk back. Stay tall and relaxed.' },
+    { title: 'Pace Strides', detail: '<strong>2 × 150m at goal 400m pace</strong> with full recovery. This is rhythm work — feel what race pace feels like before you’re tired.' }
+  ],
+  '800': [
+    { title: 'Strides', detail: '<strong>4–6 × 100m strides</strong> at 80% effort with full walk-back recovery. Focus on relaxed face, tall posture, smooth turnover. NOT a workout — this is preparing the legs to run fast.' }
+  ]
+};
+
+function renderWarmup() {
+  const common = WARMUP.common.map((s, i) => `
+    <li>
+      <div class="step-num">${i+1}</div>
+      <div class="step-content">
+        <div class="step-title">${s.title}</div>
+        <div class="step-detail">${s.detail}</div>
+      </div>
+    </li>`).join('');
+
+  const eventSpecific = WARMUP[currentProgram].map((s, i) => `
+    <li>
+      <div class="step-num">${WARMUP.common.length + i + 1}</div>
+      <div class="step-content">
+        <div class="step-title">${s.title}</div>
+        <div class="step-detail">${s.detail}</div>
+      </div>
+    </li>`).join('');
+
+  document.getElementById('tab-warmup').innerHTML = `
+    <div class="phase-header">
+      <div class="phase-label">Pre-Workout / Pre-Race</div>
+      <div class="phase-title">Full Warm-Up</div>
+      <div class="phase-desc">15–20 minutes. Do every part — sprinting cold is the #1 cause of hamstring pulls.</div>
+    </div>
+    <div class="card">
+      <h3>General Warm-Up</h3>
+      <div class="meta">All events</div>
+      <ul class="step-list">${common}</ul>
+    </div>
+    <div class="card">
+      <h3>${PROGRAMS[currentProgram].name} Specific</h3>
+      <div class="meta">Event-specific preparation</div>
+      <ul class="step-list">${eventSpecific}</ul>
+    </div>
+    <div class="warn"><strong>Race day:</strong> Finish your last build-up or start about 8–10 minutes before your race. You want to be warm and ready, not cooling down at the line.</div>
+  `;
+}
+
+// ============================================================
+// DAILY PICKER DATA
+// ============================================================
+const DAILY_OPTIONS = {
+  '100': [
+    { id: 'accel', name: 'Acceleration', desc: 'Short, explosive starts' },
+    { id: 'maxv', name: 'Max Velocity', desc: 'Top-end speed work' },
+    { id: 'speedend', name: 'Speed Endurance', desc: 'Hold speed under fatigue' },
+    { id: 'tempo', name: 'Tempo', desc: 'Easy recovery running' },
+    { id: 'strength', name: 'Strength', desc: 'Weight room / power' },
+    { id: 'plyo', name: 'Plyometrics', desc: 'Bounds, hops, jumps' }
+  ],
+  '200': [
+    { id: 'accel', name: 'Acceleration', desc: 'Short, explosive starts' },
+    { id: 'maxv', name: 'Max Velocity', desc: 'Top-end speed work' },
+    { id: 'speedend', name: 'Speed Endurance', desc: '150–300m race-pace reps' },
+    { id: 'curve', name: 'Curve Running', desc: 'Turn technique' },
+    { id: 'tempo', name: 'Tempo', desc: 'Easy recovery running' },
+    { id: 'strength', name: 'Strength', desc: 'Weight room / power' }
+  ],
+  '400': [
+    { id: 'accel', name: 'Acceleration', desc: 'Short starts, stay sharp' },
+    { id: 'speedend', name: 'Speed Endurance', desc: '200–300m fast reps' },
+    { id: 'lactic', name: 'Lactate Tolerance', desc: 'The hard 400m work' },
+    { id: 'speedend2', name: 'Special Endurance', desc: '350–500m race-modeling' },
+    { id: 'tempo', name: 'Tempo', desc: 'Aerobic recovery running' },
+    { id: 'strength', name: 'Strength', desc: 'Weight room / power' }
+  ],
+  '800': [
+    { id: 'easy', name: 'Easy Run', desc: 'Aerobic base, 20–35 min' },
+    { id: 'threshold', name: 'Threshold', desc: 'Tempo / lactate threshold' },
+    { id: 'vo2', name: 'VO₂ Intervals', desc: '400–800m hard reps' },
+    { id: 'racepace', name: 'Race Pace', desc: '600–1000m at 800 pace' },
+    { id: 'speed', name: 'Speed', desc: '150–300m fast finishes' },
+    { id: 'strength', name: 'Strength', desc: 'Weight room / power' }
+  ]
+};
+
+const DAILY_DETAILS = {
+  '100': {
+    accel: {
+      title: 'Acceleration Day',
+      meta: '20-meter to 40-meter starts',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>2 × 10m falling starts</li>
+          <li>4 × 20m from 2-point start</li>
+          <li>4 × 30m from 3-point or block start</li>
+        </ul>
+        <p><strong>Rest:</strong> Full recovery — 2–3 minutes between reps. Walk back slowly.</p>
+        <p><strong>Effort:</strong> 95–100%. These are short enough that you should feel fresh every rep.</p>
+        <div class="cue"><strong>Cue:</strong> Push the ground back, don’t reach forward. First 10m, shins angled forward, eyes down at the ground 2–3m ahead. Rise gradually — don’t pop straight up.</div>
+        <p><strong>Cool-down:</strong> 400m easy jog, stretch hip flexors and calves.</p>`
+    },
+    maxv: {
+      title: 'Max Velocity Day',
+      meta: 'Top-end speed development',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>3–4 × 30m flys (run-in 20m, time the next 30m)</li>
+          <li>2–3 × 60m at 95% with 20m fly-in</li>
+        </ul>
+        <p><strong>Rest:</strong> Full recovery — 4–6 minutes between reps. This is the most important rule on speed day.</p>
+        <p><strong>Effort:</strong> 95–100%. If times drop off, end the workout.</p>
+        <div class="cue"><strong>Cue:</strong> Tall posture, knees up not back. Heel under hip, not behind. Relaxed jaw, loose hands. Speed is rhythm, not force.</div>
+        <div class="warn"><strong>Stop if:</strong> Your times slow down by more than 3–4%. Slow reps build slow patterns.</div>
+        <p><strong>Cool-down:</strong> 800m easy jog, stretch.</p>`
+    },
+    speedend: {
+      title: 'Speed Endurance Day',
+      meta: 'Holding speed under fatigue',
+      content: `
+        <p><strong>Main set (pick one):</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>3 × 120m at 95% with 8–10 min rest</li>
+          <li>4 × 150m at 90% with 6–8 min rest</li>
+          <li>2 × (80m + 120m + 80m) with 3 min rest, 10 min between sets</li>
+        </ul>
+        <p><strong>Rest:</strong> Long — these are quality, not quantity.</p>
+        <div class="cue"><strong>Cue:</strong> When fatigue hits at 80m+, the cue is RELAX. Faces, hands, and jaw stay loose. Tense muscles fight each other.</div>
+        <p><strong>Cool-down:</strong> 800m easy jog, full stretch.</p>`
+    },
+    tempo: {
+      title: 'Tempo Day',
+      meta: 'Easy aerobic recovery',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>8 × 200m at 65–70% with 100m walk recovery</li>
+          <li>OR: 6 × 300m at 65% with 100m walk recovery</li>
+          <li>OR: Football-field "Xs" — jog endzones, run diagonals at 70% × 10 reps</li>
+        </ul>
+        <p><strong>Effort:</strong> Easy to moderate. You should be able to talk in short phrases. <strong>This is not a hard day.</strong></p>
+        <p><strong>Purpose:</strong> Active recovery, aerobic fitness, technique under control.</p>
+        <p><strong>Cool-down:</strong> 400m walk, light stretch.</p>`
+    },
+    strength: {
+      title: 'Strength Day',
+      meta: 'Weight room',
+      content: `
+        <p><strong>Main lifts (pick 2–3):</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>Back squat or front squat — 4 × 5 @ 75–85%</li>
+          <li>Romanian deadlift — 3 × 8</li>
+          <li>Step-ups (loaded) — 3 × 6 each leg</li>
+          <li>Bench press — 3 × 5</li>
+          <li>Pull-ups or rows — 3 × 6–8</li>
+        </ul>
+        <p><strong>Accessory:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>Single-leg glute bridge — 3 × 10</li>
+          <li>Plank variations — 3 × 30s</li>
+          <li>Hanging knee raises — 3 × 10</li>
+        </ul>
+        <div class="cue"><strong>Rule:</strong> Heavy in the off-season. Lighter and more explosive (3–5 reps, faster bar speed) closer to meets.</div>`
+    },
+    plyo: {
+      title: 'Plyometric Day',
+      meta: 'Power development',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>Standing long jumps — 5 reps, full recovery</li>
+          <li>Standing triple jumps — 5 reps</li>
+          <li>Box jumps (18–24") — 3 × 5</li>
+          <li>Bounds — 3 × 20m</li>
+          <li>Hurdle hops (low hurdles or cones) — 3 × 5</li>
+        </ul>
+        <p><strong>Rest:</strong> Full recovery between sets — 2–3 minutes. Quality, not quantity.</p>
+        <div class="cue"><strong>Cue:</strong> Minimize ground contact time. Land soft, push hard. Springy ankles, not heavy thuds.</div>
+        <div class="warn">Don't do plyos on tired legs. If your legs feel heavy, skip or shorten.</div>`
+    }
+  },
+
+  '200': {
+    accel: {
+      title: 'Acceleration Day',
+      meta: 'Start and drive phase',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>4 × 30m from 3-point start</li>
+          <li>3 × 50m from blocks (or 3-point)</li>
+        </ul>
+        <p><strong>Rest:</strong> 3–4 minutes between reps. Full recovery.</p>
+        <div class="cue"><strong>200m start cue:</strong> Block angle slightly different than 100m — set up to come out of the curve, not just straight. Drive the first 30m hard but stay relaxed; you have a long way to go.</div>`
+    },
+    maxv: {
+      title: 'Max Velocity Day',
+      meta: 'Top-end speed on the straight',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>3 × 30m flys (20m run-in)</li>
+          <li>2 × 80m at 95% with 30m run-in</li>
+        </ul>
+        <p><strong>Rest:</strong> 4–6 minutes. Full recovery.</p>
+        <div class="cue"><strong>Cue:</strong> Tall, relaxed, knees up. The 200m is won by the runner who holds top speed longest — not the one who hits top speed first.</div>`
+    },
+    speedend: {
+      title: 'Speed Endurance Day',
+      meta: '150–300m race-pace reps',
+      content: `
+        <p><strong>Main set (pick one):</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>3 × 150m at 95% with 8–10 min rest</li>
+          <li>2 × 250m at 90% with 12 min rest</li>
+          <li>3 × 200m at 90% with 8 min rest</li>
+        </ul>
+        <p><strong>Effort:</strong> Race pace or slightly faster. These build the ability to hold form when lactic acid hits.</p>
+        <div class="cue"><strong>Cue:</strong> The 200m is "controlled aggression" on the curve, then maximum effort relaxation on the straight. Drop the shoulders at 80m, stay smooth.</div>`
+    },
+    curve: {
+      title: 'Curve Running Day',
+      meta: 'Turn technique',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>4 × 120m on the curve at 90% — start in lanes 2, 4, 6, 8 (different curve radius each)</li>
+          <li>2 × 100m "curve into straight" at 95%</li>
+        </ul>
+        <p><strong>Rest:</strong> 4–5 minutes between reps.</p>
+        <div class="cue"><strong>Curve cues:</strong> Lean from the ankles, not the waist. Inside (left) arm shorter, outside (right) arm bigger. Eyes look ahead through the curve, not down. Foot strikes slightly under center to push out, not in.</div>`
+    },
+    tempo: {
+      title: 'Tempo Day',
+      meta: 'Easy aerobic recovery',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>6 × 200m at 65–70% with 100m walk recovery</li>
+          <li>OR: 4 × 300m at 70% with 100m walk</li>
+        </ul>
+        <p><strong>Effort:</strong> Conversational. Recovery day.</p>`
+    },
+    strength: {
+      title: 'Strength Day',
+      meta: 'Weight room',
+      content: `
+        <p>Same template as 100m strength day. See 100m strength workout for details. Focus on posterior chain (hamstrings, glutes) — the 200m engine.</p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>Squat — 4 × 5 @ 75–85%</li>
+          <li>RDL — 3 × 8</li>
+          <li>Hip thrusts — 3 × 8</li>
+          <li>Pull-ups — 3 × 6–8</li>
+          <li>Core circuit — 3 rounds</li>
+        </ul>`
+    }
+  },
+
+  '400': {
+    accel: {
+      title: 'Acceleration Day',
+      meta: 'Stay sharp on starts',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>3 × 30m from 3-point start</li>
+          <li>2 × 60m at 90% with run-in</li>
+        </ul>
+        <p><strong>Rest:</strong> 3–4 minutes.</p>
+        <p>The 400 is mostly endurance, but you still have to start efficiently. Light volume here — don't burn out the speed bank.</p>`
+    },
+    speedend: {
+      title: 'Speed Endurance Day',
+      meta: '200–300m fast reps',
+      content: `
+        <p><strong>Main set (pick one):</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>4 × 200m at 90% with 4–5 min rest</li>
+          <li>3 × 300m at 85% with 6 min rest</li>
+          <li>2 × (200m + 200m) at 90% with 60s between, 10 min between sets</li>
+        </ul>
+        <p><strong>Purpose:</strong> Trains your ability to run fast when fatigued — the defining ability of a 400m runner.</p>`
+    },
+    lactic: {
+      title: 'Lactate Tolerance Day',
+      meta: 'The signature 400m workout',
+      content: `
+        <p><strong>Main set (one option per session):</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>3 × 300m at 95% with 8–10 min rest</li>
+          <li>2 × 350m at 90% with 10–12 min rest</li>
+          <li>Broken 400: 300m + 60s rest + 100m (both at goal pace)</li>
+        </ul>
+        <div class="cue"><strong>Cue:</strong> This is going to hurt. Stay tall, relax the face, drive the arms. The pain doesn't make you slower — fighting it does.</div>
+        <div class="warn">Do this workout no more than once per week. Recovery the day after should be easy or off.</div>`
+    },
+    speedend2: {
+      title: 'Special Endurance Day',
+      meta: '350–500m race-modeling',
+      content: `
+        <p><strong>Main set (one option per session):</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>1 × 500m at goal-400 pace (faster start, hold on)</li>
+          <li>2 × 450m at 85% with 12 min rest</li>
+          <li>1 × 600m at 80% — race modeling</li>
+        </ul>
+        <p><strong>Purpose:</strong> Goes longer than your race so the race feels shorter. Builds confidence and physical reserve.</p>`
+    },
+    tempo: {
+      title: 'Tempo Day',
+      meta: 'Aerobic recovery',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>10 × 200m at 65% with 100m walk recovery</li>
+          <li>OR: 6 × 400m at 65–70% with 200m walk</li>
+          <li>OR: 20–25 min steady aerobic run</li>
+        </ul>
+        <p>Recovery between hard days. The 400 has a bigger aerobic component than the 100/200 — tempo days matter more.</p>`
+    },
+    strength: {
+      title: 'Strength Day',
+      meta: 'Weight room',
+      content: `
+        <p>Same template as the sprints, plus a little more single-leg and core volume.</p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>Squat — 4 × 5</li>
+          <li>RDL — 3 × 8</li>
+          <li>Step-ups — 3 × 8 each leg</li>
+          <li>Pull-ups — 3 × 6–8</li>
+          <li>Core circuit — 3 rounds (planks, side planks, dead bugs, hanging knee raises)</li>
+        </ul>`
+    }
+  },
+
+  '800': {
+    easy: {
+      title: 'Easy Run',
+      meta: 'Aerobic base',
+      content: `
+        <p><strong>Main:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>20–35 minutes at conversational pace</li>
+          <li>Should be able to speak in full sentences</li>
+        </ul>
+        <p><strong>Finish with:</strong> 4 × 100m strides at 80% with full recovery. Keep the legs reminded what fast feels like.</p>
+        <p>This is the foundation — most of your weekly volume lives here.</p>`
+    },
+    threshold: {
+      title: 'Threshold Day',
+      meta: 'Lactate threshold / tempo',
+      content: `
+        <p><strong>Main set (pick one):</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>2 × 8 min at threshold pace, 2 min easy between</li>
+          <li>4 × 1000m at threshold with 60–90s rest</li>
+          <li>20 min continuous tempo at "comfortably hard"</li>
+        </ul>
+        <p><strong>Effort:</strong> "Comfortably hard" — about 85% effort. You can say a few words but not hold a conversation.</p>
+        <div class="cue"><strong>Cue:</strong> Pace, not race. If you can finish thinking "I could have done one more rep," you nailed it.</div>`
+    },
+    vo2: {
+      title: 'VO₂ Intervals',
+      meta: 'Aerobic power',
+      content: `
+        <p><strong>Main set (pick one):</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>5 × 800m at 1-mile pace with equal-time rest</li>
+          <li>6 × 600m at 1-mile pace with 2 min rest</li>
+          <li>8 × 400m at 1-mile pace with 75s rest</li>
+        </ul>
+        <p><strong>Purpose:</strong> Raises the ceiling. Builds the engine that the 800 sits on top of.</p>`
+    },
+    racepace: {
+      title: 'Race Pace Day',
+      meta: 'Goal-800 pace work',
+      content: `
+        <p><strong>Main set (one option per session):</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>3 × 600m at goal 800m pace with 4–5 min rest</li>
+          <li>4 × 400m at goal 800m pace with 2–3 min rest</li>
+          <li>1000m → 800m → 600m at goal pace with 5 min rest</li>
+        </ul>
+        <p><strong>Purpose:</strong> Teaches your legs the exact rhythm of race day.</p>`
+    },
+    speed: {
+      title: 'Speed Day',
+      meta: 'Top-end and finishing speed',
+      content: `
+        <p><strong>Main set:</strong></p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>6 × 200m at 800m pace minus 2–3 seconds, with 2–3 min rest</li>
+          <li>OR: 8 × 150m fast with full recovery</li>
+          <li>OR: 4 × 300m at 90% with 4 min rest</li>
+        </ul>
+        <p><strong>Why:</strong> Your 800m kick comes from speed reserve. The faster your 400m, the easier 800m race pace feels.</p>`
+    },
+    strength: {
+      title: 'Strength Day',
+      meta: 'Weight room — runner-specific',
+      content: `
+        <p>800m runners benefit from strength training more than most distance runners realize, but volume stays moderate.</p>
+        <ul style="margin: 8px 0 12px 18px;">
+          <li>Squat — 3 × 6 @ 70–80%</li>
+          <li>RDL — 3 × 8</li>
+          <li>Step-ups — 3 × 8 each leg</li>
+          <li>Pull-ups — 3 × 6</li>
+          <li>Core circuit — planks, dead bugs, hanging knee raises</li>
+          <li>Single-leg balance work</li>
+        </ul>
+        <p>2× per week max, never the day before a key workout.</p>`
+    }
+  }
+};
+
+function renderToday() {
+  const opts = DAILY_OPTIONS[currentProgram].map(o => `
+    <button class="picker-btn ${currentDailyPick === o.id ? 'selected' : ''}" onclick="pickDaily('${o.id}')">
+      <div class="pb-name">${o.name}</div>
+      <div class="pb-desc">${o.desc}</div>
+    </button>`).join('');
+
+  let detail = '';
+  if (currentDailyPick && DAILY_DETAILS[currentProgram][currentDailyPick]) {
+    const d = DAILY_DETAILS[currentProgram][currentDailyPick];
+    detail = `
+      <div class="card">
+        <h3>${d.title}</h3>
+        <div class="meta">${d.meta}</div>
+        <div class="body">${d.content}</div>
+      </div>
+      <div class="warn"><strong>Before any workout:</strong> Do the full warm-up first (tap the Warm-Up tab). After the workout, jog 400–800m easy and stretch.</div>
+    `;
+  } else {
+    detail = `<div class="card"><div class="body" style="color:#8b9cb3;">Tap a workout type above to see the full session.</div></div>`;
+  }
+
+  document.getElementById('tab-today').innerHTML = `
+    <div class="phase-header">
+      <div class="phase-label">Free-Choice Workout</div>
+      <div class="phase-title">What are you doing today?</div>
+      <div class="phase-desc">Pick a session type. Best for off-season, when the weekly plan can’t reach you, or when you want to substitute for a planned day.</div>
+    </div>
+    <div class="picker-grid">${opts}</div>
+    ${detail}
+  `;
+}
+
+function pickDaily(id) {
+  currentDailyPick = id;
+  renderToday();
+}
+
+// ============================================================
+// 4-WEEK PLAN DATA
+// ============================================================
+// Each entry: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+const PLAN = {
+  '100': {
+    phaseName: 'Speed Development',
+    phaseDesc: '4-week block: builds acceleration, max velocity, and speed endurance. Strength on Mon/Thu, speed on Tue/Fri, tempo & recovery wedged in. Treat weeks 3–4 as sharpening.',
+    weeks: [
+      [
+        { day: 'Mon', focus: 'Strength', work: 'Weight room: Squat 4×5, RDL 3×8, bench, pull-ups, core' },
+        { day: 'Tue', focus: 'Acceleration', work: '2×10m falling starts • 4×20m starts • 4×30m starts (full recovery)' },
+        { day: 'Wed', focus: 'Tempo', work: '8×200m @ 65% with 100m walk recovery' },
+        { day: 'Thu', focus: 'Strength + Plyo', work: 'Strength (lighter) + standing long jumps 5×, bounds 3×20m' },
+        { day: 'Fri', focus: 'Max Velocity', work: '4×30m flys (20m run-in) • 2×60m at 95% (full recovery)' },
+        { day: 'Sat', focus: 'Tempo or Off', work: 'Optional: 6×200m @ 65% — or take it off if needed' },
+        { day: 'Sun', focus: 'Rest', work: 'Recovery day. Walk, foam roll, eat well.' }
+      ],
+      [
+        { day: 'Mon', focus: 'Strength', work: 'Same as week 1 — push a bit more weight if form holds' },
+        { day: 'Tue', focus: 'Acceleration', work: '3×20m starts • 4×30m starts • 2×40m starts from blocks' },
+        { day: 'Wed', focus: 'Tempo', work: '6×300m @ 65% with 100m walk recovery' },
+        { day: 'Thu', focus: 'Strength + Plyo', work: 'Strength + box jumps 3×5, hurdle hops 3×5' },
+        { day: 'Fri', focus: 'Max Velocity', work: '4×30m flys • 3×50m flys (full recovery)' },
+        { day: 'Sat', focus: 'Tempo or Off', work: 'Optional: 6×200m @ 65%' },
+        { day: 'Sun', focus: 'Rest', work: 'Recovery day' }
+      ],
+      [
+        { day: 'Mon', focus: 'Strength', work: 'Reduce volume — 3×3 heavier, more explosive' },
+        { day: 'Tue', focus: 'Acceleration', work: '4×30m from blocks • 2×50m from blocks (full recovery)' },
+        { day: 'Wed', focus: 'Tempo', work: '6×200m @ 70% — short and crisp' },
+        { day: 'Thu', focus: 'Speed Endurance', work: '3×120m at 95% with 8 min rest' },
+        { day: 'Fri', focus: 'Max Velocity', work: '3×30m flys • 2×60m at 95%' },
+        { day: 'Sat', focus: 'Time Trial or Off', work: 'Optional: 1×60m timed at 100% • or rest' },
+        { day: 'Sun', focus: 'Rest', work: 'Recovery day' }
+      ],
+      [
+        { day: 'Mon', focus: 'Strength (light)', work: 'Light, explosive: 3×3 squat, plyos. No grinding reps.' },
+        { day: 'Tue', focus: 'Acceleration', work: '3×30m starts at 100% (long rest)' },
+        { day: 'Wed', focus: 'Easy + Strides', work: 'Light tempo 4×100m, then 4×60m strides' },
+        { day: 'Thu', focus: 'Max Velocity (short)', work: '3×30m flys at 100% (full recovery) — feeling fresh and fast' },
+        { day: 'Fri', focus: 'Pre-Meet', work: 'Warm-up only + 2×60m build-ups + 1×30m from blocks' },
+        { day: 'Sat', focus: 'MEET DAY', work: 'Race! Use the Race Cues tab.' },
+        { day: 'Sun', focus: 'Active Recovery', work: '15 min walk or easy jog, stretch' }
+      ]
+    ]
+  },
+
+  '200': {
+    phaseName: 'Speed + Speed Endurance',
+    phaseDesc: '4-week block: balances acceleration, max velocity, curve work, and speed endurance. The 200m demands both top speed and the ability to hold it for the back straight.',
+    weeks: [
+      [
+        { day: 'Mon', focus: 'Strength', work: 'Squat 4×5, RDL 3×8, hip thrust 3×8, core' },
+        { day: 'Tue', focus: 'Acceleration + Curve', work: '4×30m starts • 4×120m curve runs @ 85%' },
+        { day: 'Wed', focus: 'Tempo', work: '8×200m @ 65% with 100m walk recovery' },
+        { day: 'Thu', focus: 'Strength', work: 'Lower volume, same lifts' },
+        { day: 'Fri', focus: 'Speed Endurance', work: '3×150m at 95% with 8 min rest' },
+        { day: 'Sat', focus: 'Tempo or Off', work: 'Optional: 4×300m @ 70%' },
+        { day: 'Sun', focus: 'Rest', work: 'Recovery day' }
+      ],
+      [
+        { day: 'Mon', focus: 'Strength', work: 'Same — progress weight if form holds' },
+        { day: 'Tue', focus: 'Max Velocity', work: '4×30m flys • 2×80m at 95%' },
+        { day: 'Wed', focus: 'Tempo', work: '6×300m @ 65–70% with 100m walk' },
+        { day: 'Thu', focus: 'Strength + Plyo', work: 'Strength + bounds, hurdle hops' },
+        { day: 'Fri', focus: 'Speed Endurance', work: '2×250m at 90% with 12 min rest' },
+        { day: 'Sat', focus: 'Curve Work', work: '6×120m on the curve at 90% • walk-back recovery' },
+        { day: 'Sun', focus: 'Rest', work: 'Recovery day' }
+      ],
+      [
+        { day: 'Mon', focus: 'Strength', work: 'Lighter, more explosive — 3×3 heavy, then power lifts' },
+        { day: 'Tue', focus: 'Acceleration', work: '4×30m starts • 2×60m starts from blocks' },
+        { day: 'Wed', focus: 'Tempo', work: '6×200m @ 70%' },
+        { day: 'Thu', focus: 'Race Modeling', work: '2× (80m + 120m + 80m) at race pace with 3 min, 10 min between sets' },
+        { day: 'Fri', focus: 'Max Velocity', work: '3×30m flys at 100%' },
+        { day: 'Sat', focus: 'Time Trial or Off', work: 'Optional: 1×150m at 95% — or rest' },
+        { day: 'Sun', focus: 'Rest', work: 'Recovery day' }
+      ],
+      [
+        { day: 'Mon', focus: 'Strength (light)', work: 'Light, explosive: 3×3 squat, plyos' },
+        { day: 'Tue', focus: 'Acceleration', work: '3×30m starts at 100%' },
+        { day: 'Wed', focus: 'Easy + Strides', work: '6×100m strides at 80% on the curve' },
+        { day: 'Thu', focus: 'Max Velocity (short)', work: '3×30m flys at 100%' },
+        { day: 'Fri', focus: 'Pre-Meet', work: 'Warm-up + 2×80m build-ups + 1×60m from blocks' },
+        { day: 'Sat', focus: 'MEET DAY', work: 'Race! Use the Race Cues tab.' },
+        { day: 'Sun', focus: 'Active Recovery', work: '15 min walk, stretch' }
+      ]
+    ]
+  },
+
+  '400': {
+    phaseName: 'Special Endurance',
+    phaseDesc: '4-week block: builds the lactate tolerance and special endurance that define the 400m. One lactic day per week, one long-rep day, supported by tempo, strength, and acceleration.',
+    weeks: [
+      [
+        { day: 'Mon', focus: 'Strength', work: 'Squat 4×5, RDL 3×8, step-ups, pull-ups, core (3 rounds)' },
+        { day: 'Tue', focus: 'Speed Endurance', work: '4×200m at 90% with 4–5 min rest' },
+        { day: 'Wed', focus: 'Tempo', work: '10×200m @ 65% with 100m walk recovery' },
+        { day: 'Thu', focus: 'Strength', work: 'Same as Monday, lower volume' },
+        { day: 'Fri', focus: 'Lactate Tolerance', work: '3×300m at 95% with 8–10 min rest' },
+        { day: 'Sat', focus: 'Easy', work: '20 min easy jog + 4×100m strides' },
+        { day: 'Sun', focus: 'Rest', work: 'Full recovery day' }
+      ],
+      [
+        { day: 'Mon', focus: 'Strength', work: 'Same lifts, push the weight up' },
+        { day: 'Tue', focus: 'Speed Endurance', work: '3×300m at 85% with 6 min rest' },
+        { day: 'Wed', focus: 'Tempo', work: '6×400m @ 65–70% with 200m walk' },
+        { day: 'Thu', focus: 'Strength + Plyo', work: 'Strength + bounds, hurdle hops' },
+        { day: 'Fri', focus: 'Special Endurance', work: '2×450m at 85% with 12 min rest' },
+        { day: 'Sat', focus: 'Easy', work: '20 min easy + strides' },
+        { day: 'Sun', focus: 'Rest', work: 'Recovery day' }
+      ],
+      [
+        { day: 'Mon', focus: 'Strength', work: 'Volume drops, intensity stays — 3×3 heavy + power lifts' },
+        { day: 'Tue', focus: 'Acceleration', work: '3×30m starts + 2×60m at 90% — short and sharp' },
+        { day: 'Wed', focus: 'Tempo', work: '6×200m @ 70%' },
+        { day: 'Thu', focus: 'Race Modeling', work: '1×500m at goal-400 pace, then 1×200m at race pace after 10 min' },
+        { day: 'Fri', focus: 'Speed', work: '4×150m at 95% with 6 min rest' },
+        { day: 'Sat', focus: 'Easy or TT', work: 'Optional: 1×300m timed — or just easy + strides' },
+        { day: 'Sun', focus: 'Rest', work: 'Recovery day' }
+      ],
+      [
+        { day: 'Mon', focus: 'Strength (light)', work: 'Light, explosive — 3×3 squat, plyos. No grinding.' },
+        { day: 'Tue', focus: 'Speed', work: '4×120m at 95% with 6 min rest' },
+        { day: 'Wed', focus: 'Easy + Strides', work: '15 min easy + 6×100m strides' },
+        { day: 'Thu', focus: 'Pre-Race Sharp', work: '2×200m at race pace with 8 min rest' },
+        { day: 'Fri', focus: 'Pre-Meet', work: 'Warm-up + 2×80m build-ups + 1×30m start' },
+        { day: 'Sat', focus: 'MEET DAY', work: 'Race! Use the Race Cues tab.' },
+        { day: 'Sun', focus: 'Active Recovery', work: '20 min walk or easy jog' }
+      ]
+    ]
+  },
+
+  '800': {
+    phaseName: 'Aerobic + Speed Reserve',
+    phaseDesc: '4-week block: builds the aerobic engine, threshold, race-pace, and speed reserve that the 800m sits on. The race is roughly 60% aerobic / 40% anaerobic — train both.',
+    weeks: [
+      [
+        { day: 'Mon', focus: 'Easy + Strides', work: '25 min easy + 4×100m strides at 80%' },
+        { day: 'Tue', focus: 'VO₂ Intervals', work: '6×600m at 1-mile pace with 2 min rest' },
+        { day: 'Wed', focus: 'Easy', work: '25–30 min conversational pace' },
+        { day: 'Thu', focus: 'Strength + Threshold', work: 'Threshold: 2×8 min at "comfortably hard" with 2 min easy between • Strength session after' },
+        { day: 'Fri', focus: 'Easy', work: '20 min easy + 6×100m strides' },
+        { day: 'Sat', focus: 'Race Pace', work: '4×400m at goal 800m pace with 2–3 min rest' },
+        { day: 'Sun', focus: 'Long Easy or Rest', work: '35–45 min easy aerobic — or rest' }
+      ],
+      [
+        { day: 'Mon', focus: 'Easy + Strides', work: '25 min easy + 4×100m strides' },
+        { day: 'Tue', focus: 'VO₂ Intervals', work: '5×800m at 1-mile pace with equal-time rest' },
+        { day: 'Wed', focus: 'Easy', work: '30 min conversational' },
+        { day: 'Thu', focus: 'Strength + Threshold', work: '4×1000m at threshold with 60–90s rest • Strength after' },
+        { day: 'Fri', focus: 'Easy', work: '20 min easy + 6×100m strides' },
+        { day: 'Sat', focus: 'Race Pace', work: '3×600m at goal 800m pace with 4–5 min rest' },
+        { day: 'Sun', focus: 'Long Easy or Rest', work: '40 min easy — or rest' }
+      ],
+      [
+        { day: 'Mon', focus: 'Easy + Strides', work: '25 min easy + 6×100m strides' },
+        { day: 'Tue', focus: 'Speed', work: '6×200m at 800m pace minus 2–3s with 2–3 min rest' },
+        { day: 'Wed', focus: 'Easy', work: '25 min conversational' },
+        { day: 'Thu', focus: 'Race Modeling', work: '1000m → 800m → 600m at goal pace with 5 min rest' },
+        { day: 'Fri', focus: 'Easy', work: '20 min easy + 4×100m strides' },
+        { day: 'Sat', focus: 'Speed', work: '4×300m at 90% with 4 min rest' },
+        { day: 'Sun', focus: 'Long Easy or Rest', work: '35 min easy — or rest' }
+      ],
+      [
+        { day: 'Mon', focus: 'Easy + Strides', work: '20 min easy + 4×100m strides' },
+        { day: 'Tue', focus: 'Race-Pace Sharp', work: '3×400m at goal 800m pace with 3 min rest' },
+        { day: 'Wed', focus: 'Easy', work: '20 min easy + 4×100m strides' },
+        { day: 'Thu', focus: 'Speed', work: '5×200m at fast pace with 3 min rest' },
+        { day: 'Fri', focus: 'Pre-Meet', work: '15 min easy + 4×100m strides + 1×200m at race pace' },
+        { day: 'Sat', focus: 'MEET DAY', work: 'Race! Use the Race Cues tab.' },
+        { day: 'Sun', focus: 'Active Recovery', work: '20–30 min very easy jog' }
+      ]
+    ]
+  }
+};
+
+function renderPlan() {
+  const p = PLAN[currentProgram];
+  const weekButtons = [1,2,3,4].map(w => `
+    <button class="week-btn ${currentWeek === w ? 'active' : ''}" onclick="setWeek(${w})">
+      Week ${w}${w === 4 ? ' • Taper' : ''}
+    </button>`).join('');
+
+  const days = p.weeks[currentWeek - 1].map(d => `
+    <div class="day-card ${d.focus === 'Rest' ? 'rest' : ''}">
+      <div class="day-label">${d.day}</div>
+      <div class="day-focus">${d.focus}</div>
+      <div class="day-work">${d.work}</div>
+    </div>`).join('');
+
+  document.getElementById('tab-plan').innerHTML = `
+    <div class="phase-header">
+      <div class="phase-label">${PROGRAMS[currentProgram].name} • 4 Weeks</div>
+      <div class="phase-title">${p.phaseName}</div>
+      <div class="phase-desc">${p.phaseDesc}</div>
+    </div>
+    <div class="week-bar">${weekButtons}</div>
+    ${days}
+    <div class="warn"><strong>Adjust as needed:</strong> Move workouts around your school schedule. Two hard days back-to-back is the most common training mistake — always put an easy day or rest day between any two hard sessions.</div>
+  `;
+}
+
+function setWeek(w) {
+  currentWeek = w;
+  renderPlan();
+  saveState();
+}
+
+// ============================================================
+// RACE CUES DATA
+// ============================================================
+const RACE_CUES = {
+  '100': {
+    title: '100m Race Cues',
+    desc: 'The 100m has three phases: drive, transition, max velocity. Hit each one cleanly.',
+    phases: [
+      {
+        name: 'Drive Phase (0–30m)',
+        cues: [
+          'Stay LOW out of the blocks — shins angled forward, eyes down at the ground 2–3m ahead',
+          'Push the ground BACK, don\'t reach forward',
+          'Each step should be slightly bigger than the last',
+          'Don\'t pop up — rise gradually over the first 8–10 steps',
+          'Arms drive aggressively front-to-back, not side-to-side'
+        ]
+      },
+      {
+        name: 'Transition (30–60m)',
+        cues: [
+          'Continue to rise, but never lock out tall too early',
+          'Stride length and frequency are both building',
+          'Stay relaxed in the face and shoulders'
+        ]
+      },
+      {
+        name: 'Max Velocity (60–100m)',
+        cues: [
+          'Tall posture, knees up not back',
+          'Heel recovers under the hip, not behind the body',
+          'RELAX — loose jaw, loose hands. Tense muscles fight each other',
+          'Run THROUGH the line, not to it — don\'t lean until the last step'
+        ]
+      }
+    ]
+  },
+  '200': {
+    title: '200m Race Cues',
+    desc: 'Curve, then straight. Two distinct halves — race them differently.',
+    phases: [
+      {
+        name: 'The Start & Curve (0–100m)',
+        cues: [
+          'Block angle accounts for the curve — you\'re heading slightly inward, not straight',
+          'Drive hard for 25–30m, then build speed through the curve',
+          'Lean INTO the turn from the ankles, not the waist',
+          'Inside (left) arm shorter and tighter, outside (right) arm bigger and freer',
+          'Eyes look AHEAD through the curve, not at the lane line'
+        ]
+      },
+      {
+        name: 'Curve to Straight (100–130m)',
+        cues: [
+          'As you exit the curve, you should be at near-top speed',
+          'Drop the shoulders, stay tall, stay relaxed',
+          'The straight will feel slow after the curve — that\'s an illusion, you\'re flying'
+        ]
+      },
+      {
+        name: 'The Home Straight (130–200m)',
+        cues: [
+          'The race is now about HOLDING speed, not gaining it',
+          'When fatigue hits, the cue is RELAX. Face, hands, jaw',
+          'Drive the arms — they\'ll pull the legs through',
+          'Run THROUGH the line. Don\'t lean until the last step'
+        ]
+      }
+    ]
+  },
+  '400': {
+    title: '400m Race Cues',
+    desc: 'The 400m is run in four 100m segments. Each one has a different job.',
+    phases: [
+      {
+        name: 'First 100m — Drive & Set',
+        cues: [
+          'Out of the blocks aggressively but CONTROLLED',
+          'Build to about 95% by 50m — never 100%',
+          'By 100m, you should feel "fast but not fighting"'
+        ]
+      },
+      {
+        name: 'Second 100m — Float',
+        cues: [
+          'Best 400m runners look like they\'re jogging here',
+          'Maintain speed by RELAXING, not by pushing harder',
+          'Long, smooth strides. Drop the shoulders. Save the gas tank',
+          'This is the hardest segment to run right — it\'s where races are won and lost'
+        ]
+      },
+      {
+        name: 'Third 100m — Stay Strong (200–300m)',
+        cues: [
+          'Most painful section. Lactic acid is hitting',
+          'The cue is "drive the arms" — your arms will pull your legs through',
+          'Stay tall — don\'t collapse forward at the waist',
+          'Hold form. Form holds time'
+        ]
+      },
+      {
+        name: 'Final 100m — Empty the Tank',
+        cues: [
+          'It\'s going to hurt. That\'s the race. Accept it',
+          'Drive the arms. Drive the knees. Hold position',
+          'Don\'t lean until the last 2 steps',
+          'You\'re not racing the other runners now — you\'re racing the clock and yourself'
+        ]
+      }
+    ]
+  },
+  '800': {
+    title: '800m Race Cues',
+    desc: 'The 800m is two laps with three tactical decisions: position, surge, kick.',
+    phases: [
+      {
+        name: 'First 200m — Position',
+        cues: [
+          'Out fast but not panicked — get to the rail without spiking the heart rate',
+          'Settle into position by the end of the back straight',
+          'You want lane 1 or just outside, not boxed in but not wasting steps wide'
+        ]
+      },
+      {
+        name: '200m–500m — Settle and Float',
+        cues: [
+          'Find the rhythm. Breathing should be controlled, deep, in cadence',
+          'Run smooth and tall. Save the legs for the second half',
+          'If someone surges, decide: cover it or let them go (depends on your strategy)'
+        ]
+      },
+      {
+        name: '500m–700m — The Move',
+        cues: [
+          'The race begins here. Lift the cadence',
+          'Don\'t look around — eyes forward, drive the arms',
+          'This is where you commit. Run through the field, don\'t wait for the kick to do it for you'
+        ]
+      },
+      {
+        name: '700m–800m — Kick',
+        cues: [
+          'It will hurt. It will always hurt. You\'re trained for this',
+          'Drive the arms hard — they\'ll pull the legs',
+          'Stay tall — don\'t collapse forward',
+          'Run THROUGH the line. Lean only at the last step'
+        ]
+      }
+    ]
+  }
+};
+
+function renderCues() {
+  const c = RACE_CUES[currentProgram];
+  const phases = c.phases.map(p => `
+    <div class="card">
+      <h3>${p.name}</h3>
+      <ul class="step-list">
+        ${p.cues.map((cue, i) => `
+          <li>
+            <div class="step-num">${i+1}</div>
+            <div class="step-content">
+              <div class="step-detail">${cue}</div>
+            </div>
+          </li>`).join('')}
+      </ul>
+    </div>
+  `).join('');
+
+  document.getElementById('tab-cues').innerHTML = `
+    <div class="phase-header">
+      <div class="phase-label">Race Day</div>
+      <div class="phase-title">${c.title}</div>
+      <div class="phase-desc">${c.desc}</div>
+    </div>
+    ${phases}
+    <div class="warn"><strong>Universal rule:</strong> Run through the finish, never to it. Lean only on the last step. Decelerating before the line is the most common time loss in any race.</div>
+  `;
+}
+
+function renderAll() {
+  renderWarmup();
+  renderToday();
+  renderPlan();
+  renderCues();
+}
+
+// Close modals on overlay tap
+document.getElementById('settingsModal').addEventListener('click', e => {
+  if (e.target.id === 'settingsModal') closeSettings();
+});
+document.getElementById('helpModal').addEventListener('click', e => {
+  if (e.target.id === 'helpModal') closeHelp();
+});
+</script>
+</body>
+</html>
